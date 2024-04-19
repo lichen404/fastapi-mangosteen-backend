@@ -15,6 +15,5 @@ class Item(models.Model):
     kind = fields.CharEnumField(enum_type=EnumType, default=None, description="类型", null=True, max_length=10)
     tags = fields.ManyToManyField('models.Tag', related_name='items', description='标签')
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
-    # auto_now 参数无效
     updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
     happen_at = fields.DatetimeField(description="发生时间", null=True)

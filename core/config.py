@@ -3,10 +3,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    TITLE: Optional[str] = "电影列表接口"
+    TITLE: Optional[str] = "山竹记账接口"
 
     DESC: Optional[str] = """
-    - 电影列表项目，基于Hello Flask 一书中的 实战项目
+    - 山竹记账接口，基于饥人谷山竹记账项目
     - 实现： FastAPI ....
     """
 
