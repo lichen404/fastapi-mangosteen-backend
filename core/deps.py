@@ -17,7 +17,6 @@ async def get_auth_header(auth_key: str = Security(token_key)):
     # 例如，如果是 Basic Auth，你可以解码并验证用户名密码
 
     auth_key = auth_key.split(' ')[1]
-    print(auth_key)
     return auth_key
 
 

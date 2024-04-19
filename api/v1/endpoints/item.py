@@ -11,8 +11,8 @@ item = APIRouter(tags=["Item相关"])
 
 
 @item.get("/items", summary="Item 列表", )
-async def movie_list(happened_before: datetime, happened_after: datetime, limit: int = 25, page: int = 1,
-                     current_user=Depends(deps.get_current_user)):
+async def item_list(happened_before: datetime, happened_after: datetime, limit: int = 25, page: int = 1,
+                    current_user=Depends(deps.get_current_user)):
     items_with_tags = []
     skip = (page - 1) * limit
     items = await (
@@ -23,8 +23,12 @@ async def movie_list(happened_before: datetime, happened_after: datetime, limit:
         tags = await i.tags.all()
         items_with_tags.append({'amount': i.amount, 'id': i.pk, 'tags': tags, 'kind': i.kind, 'happen_at': i.happen_at})
     data = {
-        "total": await Item.filter(user=current_user).all().count(),
-        "items": items_with_tags
+        "pager": {
+            "count": await Item.filter(user=current_user).all().count(),
+            'page': str(page),
+            'per_page': limit
+        },
+        "resources": items_with_tags
     }
     return data
 
@@ -35,10 +39,10 @@ class BalanceOut(BaseModel):
     balance: int
 
 
-@item.get("/balance", summary="收支", response_model=BalanceOut)
-async def movie_list(happened_before: datetime,
-                     happened_after: datetime,
-                     current_user=Depends(deps.get_current_user)):
+@item.get("/items/balance", summary="收支", response_model=BalanceOut)
+async def items_balance(happened_before: datetime,
+                        happened_after: datetime,
+                        current_user=Depends(deps.get_current_user)):
     balance = {'income': 0, 'expenses': 0, 'balance': 0}
     items = await Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after).all()
     for i in items:
@@ -57,12 +61,12 @@ class SummaryOut(BaseModel):
     total: int
 
 
-@item.get("/summary", summary="收支", response_model=SummaryOut)
-async def movie_list(happened_before: datetime,
-                     happened_after: datetime,
-                     kind: Literal['income', 'expenses'] = 'income',
-                     group_by: Literal['tag_id', 'happen_at'] = "tag_id",
-                     current_user=Depends(deps.get_current_user)):
+@item.get("/items/summary", summary="收支", response_model=SummaryOut)
+async def summary(happened_before: datetime,
+                  happened_after: datetime,
+                  kind: Literal['income', 'expenses'] = 'income',
+                  group_by: Literal['tag_id', 'happen_at'] = "tag_id",
+                  current_user=Depends(deps.get_current_user)):
     result = {}
     items = await (
         Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after, kind=kind)
@@ -74,7 +78,10 @@ async def movie_list(happened_before: datetime,
                 if result.get(t.pk) is None:
                     result[t.pk] = {
                         'tag_id': t.pk,
-                        'tag': t,
+                        'tag': {
+                            'name': t.name,
+                            'sign': t.sign
+                        },
                         'amount': i.amount
                     }
                 else:
@@ -100,9 +107,9 @@ class ItemModel(BaseModel):
     happen_at: datetime
 
 
-@item.post("/item", summary="新增item")
-async def movie_create(movie_form: ItemModel, user=Depends(deps.get_current_user)):
-    data = await Item.create(user=user, **movie_form.dict())
-    tags = await Tag.filter(id__in=movie_form.tag_ids)
+@item.post("/items", summary="新增item")
+async def item_create(item_form: ItemModel, user=Depends(deps.get_current_user)):
+    data = await Item.create(user=user, **item_form.dict())
+    tags = await Tag.filter(id__in=item_form.tag_ids)
     await data.tags.add(*tags)
     return data

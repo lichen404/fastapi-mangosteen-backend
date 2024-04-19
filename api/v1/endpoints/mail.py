@@ -5,7 +5,6 @@ from fastapi.background import BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr, BaseModel, Field
-
 from core import settings
 from core.redis import get_redis
 
@@ -34,7 +33,7 @@ def generate_verification_code():
     return ''.join(random.choices(string.digits, k=6))
 
 
-@mail.post("/send-verification-code", summary="发送验证码")
+@mail.post("/validation_codes", summary="发送验证码")
 async def send_in_background(
         background_tasks: BackgroundTasks,
         email: EmailSchema,
