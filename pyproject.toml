@@ -21,10 +21,8 @@ python-jose = "^3.3.0"
 pydantic-settings = "^2.2.1"
 redis = "^5.0.3"
 fastapi-mail = "^1.4.1"
-
-
-[tool.poetry.group.dev.dependencies]
 aerich = "^0.7.2"
+
 
 [build-system]
 requires = ["poetry-core"]
