@@ -2,3 +2,30 @@
 tortoise_orm = "settings.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
+
+[tool.poetry]
+name = "fastapi-mangosteen-backend"
+version = "0.1.0"
+description = ""
+authors = ["lichen404 <f360family@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.110.2"
+tortoise-orm = "^0.20.0"
+uvicorn = "^0.29.0"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+pydantic-settings = "^2.2.1"
+redis = "^5.0.3"
+fastapi-mail = "^1.4.1"
+
+
+[tool.poetry.group.dev.dependencies]
+aerich = "^0.7.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
