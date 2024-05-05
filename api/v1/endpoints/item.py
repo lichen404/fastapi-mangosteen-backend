@@ -24,7 +24,7 @@ async def item_list(happened_before: datetime, happened_after: datetime, limit: 
         items_with_tags.append({'amount': i.amount, 'id': i.pk, 'tags': tags, 'kind': i.kind, 'happen_at': i.happen_at})
     data = {
         "pager": {
-            "count": await Item.filter(user=current_user).all().count(),
+            "count": await Item.filter(user=current_user,happen_at__lt=happened_before, happen_at__gt=happened_after).count(),
             'page': str(page),
             'per_page': limit
         },
