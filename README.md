@@ -21,14 +21,14 @@
 [文档](http://123.57.27.189:3000/docs)
 
 ## Docker 部署
-1.安装Docker-compose
+1. 安装Docker-compose
 2. `git clone https://github.com/lichen404/fastapi-mangosteen-backend.git`
 3. `cd fastapi-mangosteen-backend`
 4. 创建 .env 文件
-```bash
-SECRET_KEY=secret
-MAIL_PASSWORD=qq邮箱申请的smtp授权码
-```
+  ```bash
+  SECRET_KEY=secret
+  MAIL_PASSWORD=qq邮箱申请的smtp授权码
+  ```
 5. 执行 `docker-compose up -d`
 6. docker exec -it 容器id bash 
 7. 执行 `poetry shell`
