@@ -143,4 +143,6 @@ cython_debug/
 .vscode
 
 watch.sqlite
+watch.sqlite-shm
+watch.sqlite-wal
 
