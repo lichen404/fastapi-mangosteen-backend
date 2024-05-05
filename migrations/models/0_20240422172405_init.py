@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "tag" (
     "name" VARCHAR(50) NOT NULL  /* 名称 */,
     "sign" VARCHAR(10) NOT NULL  /* 标志 */,
     "created_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP /* 创建时间 */,
+    "kind" VARCHAR(10)   /* 类型 */,
     "updated_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP /* 更新时间 */,
     "user_id" INT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE
 );
