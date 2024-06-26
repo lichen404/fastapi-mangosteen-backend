@@ -1,15 +1,18 @@
 import random
 import string
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.background import BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr, BaseModel, Field
 from core import settings
 from core.redis import get_redis
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 mail = APIRouter(tags=["发送邮件"])
 
+limiter = Limiter(key_func=get_remote_address)
 
 class EmailSchema(BaseModel):
     email: EmailStr = Field(examples=["2725546002@qq.com"])
@@ -34,13 +37,15 @@ def generate_verification_code():
 
 
 @mail.post("/validation_codes", summary="发送验证码")
+@limiter.limit("1/minute")
 async def send_in_background(
+        request: Request,
         background_tasks: BackgroundTasks,
         email: EmailSchema,
         redis=Depends(get_redis)
 ) -> JSONResponse:
     code = generate_verification_code()
-    user_email = email.dict().get("email")
+    user_email = email.model_dump().get("email")
     redis.set(user_email, code, ex=300)
     message = MessageSchema(
         subject="山竹记账验证码",

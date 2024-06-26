@@ -22,6 +22,7 @@ redis = "^5.0.3"
 fastapi-mail = "^1.4.1"
 aerich = "^0.7.2"
 fastapi = "^0.110.2"
+slowapi = "^0.1.9"
 
 
 [build-system]
