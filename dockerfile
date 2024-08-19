@@ -14,5 +14,11 @@ COPY . /app/
 # 使用Poetry安装依赖项
 RUN poetry install
 
+# 添加初始化脚本
+COPY init.sh /usr/local/bin/init.sh
+
+# 设置脚本权限
+RUN chmod +x /usr/local/bin/init.sh
+
 # 启动应用
-CMD ["poetry", "run", "python", "main.py"]
+CMD ["/usr/local/bin/init.sh"]

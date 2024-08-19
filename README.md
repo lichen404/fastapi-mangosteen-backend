@@ -30,8 +30,6 @@
   MAIL_PASSWORD=qq邮箱申请的smtp授权码
   ```
 5. 执行 `docker-compose up -d`
-6. docker exec -it 容器id bash 
-7. 执行 `poetry shell`
-8. 执行 `aerich init-db`
+6. 访问 http://localhost:3000/docs
 
 
