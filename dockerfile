@@ -3,7 +3,7 @@ FROM python:3.12
 
 
 # 安装Poetry
-RUN pip install poetry
+RUN pip install poetry -i https://mirrors.aliyun.com/pypi/simple
 
 # 设置工作目录
 WORKDIR /app
