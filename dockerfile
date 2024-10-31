@@ -11,6 +11,11 @@ WORKDIR /app
 # 将项目文件添加到工作目录中
 COPY . /app/
 
+# 配置镜像源
+RUN poetry self add poetry-plugin-pypi-mirror
+
+RUN export POETRY_PYPI_MIRROR_URL=https://mirrors.aliyun.com/pypi/simple
+
 # 使用Poetry安装依赖项
 RUN poetry install
 
