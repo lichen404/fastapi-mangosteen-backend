@@ -109,7 +109,7 @@ class ItemModel(BaseModel):
 
 @item.post("/items", summary="新增item")
 async def item_create(item_form: ItemModel, user=Depends(deps.get_current_user)):
-    data = await Item.create(user=user, **item_form.dict())
+    data = await Item.create(user=user, **item_form.model_dump())
     tags = await Tag.filter(id__in=item_form.tag_ids)
     await data.tags.add(*tags)
     return data
