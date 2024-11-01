@@ -101,7 +101,7 @@ async def summary(happened_before: datetime,
 
 
 class ItemModel(BaseModel):
-    amount: int
+    amount: float
     tag_ids: List[int] = []
     kind: EnumType
     happen_at: datetime
