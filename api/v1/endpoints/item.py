@@ -34,9 +34,9 @@ async def item_list(happened_before: datetime, happened_after: datetime, limit: 
 
 
 class BalanceOut(BaseModel):
-    expenses: int
-    income: int
-    balance: int
+    expenses: float
+    income: float
+    balance: float
 
 
 @item.get("/items/balance", summary="收支", response_model=BalanceOut)
