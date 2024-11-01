@@ -58,7 +58,7 @@ async def items_balance(happened_before: datetime,
 
 class SummaryOut(BaseModel):
     groups: List
-    total: int
+    total: float
 
 
 @item.get("/items/summary", summary="收支", response_model=SummaryOut)
