@@ -7,6 +7,7 @@ from scheams import TagIn_Pydantic, Tag_Pydantic
 
 tag = APIRouter(tags=["标签相关"])
 
+TagIn_Pydantic_Type = type[TagIn_Pydantic]
 
 @tag.get("/tags/{pk}", summary="查询标签")
 async def get_tag(pk: int):
@@ -31,14 +32,14 @@ async def item_list(kind: Literal['expenses', 'income'], limit: int = 25, page: 
 
 
 @tag.post("/tags", summary="新增标签")
-async def tag_create(tag_from: TagIn_Pydantic, user=Depends(deps.get_current_user)):
-    data = await Tag_Pydantic.from_tortoise_orm(await Tag.create(user=user, **tag_from.dict()))
+async def tag_create(tag_from: TagIn_Pydantic_Type, user=Depends(deps.get_current_user)):
+    data = await Tag_Pydantic.from_tortoise_orm(await Tag.create(user=user, **tag_from.model_dump()))
     return data
 
 
 @tag.put("/tags/{pk}", summary="编辑标签", dependencies=[Depends(deps.get_current_user)])
-async def tag_update(pk: int, tag_form: TagIn_Pydantic):
-    if await Tag.filter(pk=pk).update(**tag_form.dict()):
+async def tag_update(pk: int, tag_form: TagIn_Pydantic_Type):
+    if await Tag.filter(pk=pk).update(**tag_form.model_dump()):
         m = await Tag.filter(pk=pk).first()
         # 调用 .save 方法才能触发 auto_now
         await m.save()
