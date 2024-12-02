@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from core import deps
-from scheams import User_Pydantic
+from schemas import User_Pydantic
 from models import User
 
 user = APIRouter(tags=["用户相关"])

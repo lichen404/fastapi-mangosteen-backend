@@ -1,8 +1,9 @@
 """
 create app
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from tortoise.contrib.fastapi import register_tortoise
 from slowapi.middleware import SlowAPIMiddleware
 from settings import TORTOISE_ORM
@@ -23,6 +24,22 @@ app.state.limiter = limiter
 app.include_router(v1, prefix="/api")
 
 
+# 定制错误信息的异常处理器
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 429:  # 针对速率限制错误
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "error":"请求太快，请稍后再试",
+            }
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": str(exc.detail)
+        }
+    )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ORIGINS,

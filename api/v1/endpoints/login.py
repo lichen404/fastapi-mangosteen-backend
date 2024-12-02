@@ -20,8 +20,8 @@ class Form(BaseModel):
 async def user_login(form: Form, redis=Depends(get_redis)):
     if stored_code := redis.get(form.email):
         if form.code != stored_code.decode():
-            raise HTTPException(status_code=400, detail="Invalid verification code")
+            raise HTTPException(status_code=400, detail="验证码错误")
         if user := await User.get_or_create(email=form.email):
             token = create_access_token({"user_id": user[0].pk})
             return Token(jwt=token)
-    raise HTTPException(status_code=404, detail="Verification code not found")
+    raise HTTPException(status_code=404, detail="请先获取验证码")

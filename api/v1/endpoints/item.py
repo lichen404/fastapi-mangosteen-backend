@@ -1,11 +1,10 @@
 from datetime import datetime
+from models.item import EnumType
 from typing import List, Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-
 from core import deps
 from models import Item, Tag
-from models.item import EnumType
 
 item = APIRouter(tags=["Item相关"])
 
@@ -52,7 +51,8 @@ async def items_balance(happened_before: datetime,
         else:
             balance['income'] += i.amount
             balance['balance'] += i.amount
-
+    for key in balance:
+        balance[key] = round(balance[key], 2)
     return balance
 
 
