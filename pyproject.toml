@@ -25,6 +25,11 @@ fastapi = "^0.110.2"
 slowapi = "^0.1.9"
 
 
+[[tool.poetry.source]]
+name = "mirrors"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
+priority = "primary"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
