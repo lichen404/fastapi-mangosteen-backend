@@ -72,6 +72,8 @@ async def summary(happened_before: datetime,
                   group_by: Literal['tag_id', 'happen_at'] = "tag_id",
                   current_user=Depends(deps.get_current_user)):
     result = {}
+    if (happened_before - happened_after).days > 366:
+        raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
     items = await (
         Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after, kind=kind)
         .all()).prefetch_related('tags')
