@@ -15,6 +15,7 @@ jobs:
       - name: Copy project to server
         uses: appleboy/scp-action@v0.1.7
         with:
+          environment: production
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -29,6 +30,7 @@ jobs:
       - name: Build and run on server
         uses: appleboy/ssh-action@v1.2.0
         with:
+          environment: production
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
