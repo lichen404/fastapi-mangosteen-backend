@@ -1,7 +1,7 @@
 from datetime import datetime
 from models.item import EnumType
 from typing import List, Literal
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from core import deps
 from models import Item, Tag
@@ -12,6 +12,8 @@ item = APIRouter(tags=["Item相关"])
 @item.get("/items", summary="Item 列表", )
 async def item_list(happened_before: datetime, happened_after: datetime, limit: int = 25, page: int = 1,
                     current_user=Depends(deps.get_current_user)):
+    if (happened_before - happened_after).days > 366:
+        raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
     items_with_tags = []
     skip = (page - 1) * limit
     items = await (
@@ -42,7 +44,9 @@ class BalanceOut(BaseModel):
 async def items_balance(happened_before: datetime,
                         happened_after: datetime,
                         current_user=Depends(deps.get_current_user)):
-    balance = {'income': 0, 'expenses': 0, 'balance': 0}
+    balance = {'income': 0.0, 'expenses': 0.0, 'balance': 0.0}
+    if (happened_before - happened_after).days > 366:
+        raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
     items = await Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after).all()
     for i in items:
         if i.kind == 'expenses':
