@@ -37,6 +37,12 @@ jobs:
           script: |
             set -euo pipefail
             cd ~/apps/fastapi-mangosteen-backend
+            # Write .env from GitHub Secrets (adjust list as needed)
+            cat > .env << 'EOF'
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            EOF
+            chmod 600 .env || true
             if command -v docker >/dev/null 2>&1; then
               echo "Docker found"
             else
