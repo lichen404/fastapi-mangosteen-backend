@@ -9,7 +9,7 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
 );
 CREATE TABLE IF NOT EXISTS "item" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "amount" INT NOT NULL  /* 金额 */,
+    "amount" REAL NOT NULL  /* 金额 */,
     "kind" VARCHAR(10)   /* 类型 */,
     "created_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP /* 创建时间 */,
     "updated_at" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP /* 更新时间 */,
