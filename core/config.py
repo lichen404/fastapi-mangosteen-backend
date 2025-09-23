@@ -11,13 +11,12 @@ class Settings(BaseSettings):
     """
 
     # 邮件发送相关
-    MAIL_PASSWORD: str
+    MAIL_PASSWORD: str = ""
 
     # JWT
     # token相关
     ALGORITHM: str = "HS256"  # 加密算法
-    SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 3  # token的时效 3 天 = 60 * 24 * 3
+    SECRET_KEY: str = ""
 
     ORIGINS: List[str] = [
         "http://localhost:3000"
