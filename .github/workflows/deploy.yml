@@ -43,9 +43,9 @@ jobs:
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}
             POSTGRES_PORT=${{ secrets.POSTGRES_PORT || 5432 }}
-            POSTGRES_DB=${{ secrets.POSTGRES_DB || mangosteen }}
-            POSTGRES_USER=${{ secrets.POSTGRES_USER || mangosteen }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || mangosteen }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB || 'mangosteen' }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER || 'mangosteen' }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || 'mangosteen' }}
             EOF
             chmod 600 .env || true
             if command -v docker >/dev/null 2>&1; then
