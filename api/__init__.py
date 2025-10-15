@@ -7,10 +7,9 @@ from fastapi.responses import JSONResponse
 from tortoise.contrib.fastapi import register_tortoise
 from slowapi.middleware import SlowAPIMiddleware
 from settings import TORTOISE_ORM
-from  .v1.endpoints.mail import limiter
+from .v1.endpoints.mail import limiter
 from .v1 import v1
 from core import settings
-
 
 
 app = FastAPI(title=settings.TITLE, description=settings.DESC)
@@ -31,7 +30,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
         return JSONResponse(
             status_code=exc.status_code,
             content={
-                "error":"请求太快，请稍后再试",
+                "error": "请求太快，请稍后再试",
             }
         )
     return JSONResponse(

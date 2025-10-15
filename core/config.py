@@ -1,8 +1,10 @@
 from typing import Optional, List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    # pydantic v2 settings configuration
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     TITLE: Optional[str] = "山竹记账接口"
 
     DESC: Optional[str] = """
@@ -28,8 +30,6 @@ class Settings(BaseSettings):
         "*"
     ]
 
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()
