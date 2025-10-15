@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Ensure .env is loaded for os.getenv in local/dev and non-poetry environments
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=False)
 
 
 def _get_env(name: str, default: str) -> str:
