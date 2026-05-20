@@ -14,13 +14,7 @@ from core import settings
 
 app = FastAPI(title=settings.TITLE, description=settings.DESC)
 
-# 添加 SlowAPIMiddleware 中间件
-app.add_middleware(SlowAPIMiddleware)
 
-# 将默认的速率限制处理器添加到应用中
-app.state.limiter = limiter
-
-app.include_router(v1, prefix="/api")
 
 
 # 定制错误信息的异常处理器
@@ -39,6 +33,15 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
             "error": str(exc.detail)
         }
     )
+# 添加 SlowAPIMiddleware 中间件（先加 = 内层，后被 CORS 包裹）
+app.add_middleware(SlowAPIMiddleware)
+
+# 将默认的速率限制处理器添加到应用中
+app.state.limiter = limiter
+
+app.include_router(v1, prefix="/api")
+
+# CORS 最后加 = 最外层，确保所有响应（含 429）都带 CORS 头
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ORIGINS,

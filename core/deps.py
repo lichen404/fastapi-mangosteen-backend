@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Header, Security
+from fastapi import Depends, HTTPException, Security
 from fastapi import status
 from fastapi.security import APIKeyHeader
 from jose import jwt, JWTError
@@ -16,8 +16,10 @@ async def get_auth_header(auth_key: str = Security(token_key)):
     # 例如，如果是 Bearer Token，你可以提取 Token 部分并验证
     # 例如，如果是 Basic Auth，你可以解码并验证用户名密码
 
-    auth_key = auth_key.split(' ')[1]
-    return auth_key
+    parts = auth_key.split(' ')
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        raise HTTPException(status_code=401, detail="Invalid authorization format")
+    return parts[1]
 
 
 async def get_current_user(token: str = Depends(get_auth_header)) -> User:
@@ -41,7 +43,7 @@ async def get_current_user(token: str = Depends(get_auth_header)) -> User:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await User.get(pk=user_id)
+    user = await User.get_or_none(pk=user_id)
     if user is None:
         raise credentials_exception
     return user

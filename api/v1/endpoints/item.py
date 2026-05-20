@@ -1,8 +1,11 @@
+import asyncio
 from datetime import datetime
+from decimal import Decimal
 from models.item import EnumType
 from typing import List, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from tortoise.functions import Sum
 from core import deps
 from models import Item, Tag
 
@@ -14,18 +17,18 @@ async def item_list(happened_before: datetime, happened_after: datetime, limit: 
                     current_user=Depends(deps.get_current_user)):
     if (happened_before - happened_after).days > 366:
         raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
-    items_with_tags = []
     skip = (page - 1) * limit
-    items = await (
-        Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after).all().offset(
-            skip).limit(limit).order_by('-id')
-        .prefetch_related('tags'))
+    base_filter = Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after)
+    items, count = await asyncio.gather(
+        base_filter.offset(skip).limit(limit).order_by('-id').prefetch_related('tags'),
+        base_filter.count()
+    )
+    items_with_tags = []
     for i in items:
-        tags = await i.tags.all()
-        items_with_tags.append({'amount': i.amount, 'id': i.pk, 'tags': tags, 'kind': i.kind, 'happen_at': i.happen_at})
+        items_with_tags.append({'amount': i.amount, 'id': i.pk, 'tags': list(i.tags), 'kind': i.kind, 'happen_at': i.happen_at})
     data = {
         "pager": {
-            "count": await Item.filter(user=current_user,happen_at__lt=happened_before, happen_at__gt=happened_after).count(),
+            "count": count,
             'page': str(page),
             'per_page': limit
         },
@@ -44,20 +47,20 @@ class BalanceOut(BaseModel):
 async def items_balance(happened_before: datetime,
                         happened_after: datetime,
                         current_user=Depends(deps.get_current_user)):
-    balance = {'income': 0.0, 'expenses': 0.0, 'balance': 0.0}
     if (happened_before - happened_after).days > 366:
         raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
-    items = await Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after).all()
-    for i in items:
-        if i.kind == 'expenses':
-            balance['expenses'] += i.amount
-            balance['balance'] -= i.amount
-        else:
-            balance['income'] += i.amount
-            balance['balance'] += i.amount
-    for key in balance:
-        balance[key] = round(balance[key], 2)
-    return balance
+    base_filter = Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after)
+    income_rows, expenses_rows = await asyncio.gather(
+        base_filter.filter(kind='income').annotate(total=Sum('amount')).values('total'),
+        base_filter.filter(kind='expenses').annotate(total=Sum('amount')).values('total'),
+    )
+    income = income_rows[0]['total'] or Decimal(0)
+    expenses = expenses_rows[0]['total'] or Decimal(0)
+    return {
+        'income': float(income),
+        'expenses': float(expenses),
+        'balance': float(income - expenses)
+    }
 
 
 class SummaryOut(BaseModel):
@@ -76,11 +79,11 @@ async def summary(happened_before: datetime,
         raise HTTPException(status_code=400, detail="时间间隔不能超过1年")
     items = await (
         Item.filter(user=current_user, happen_at__lt=happened_before, happen_at__gt=happened_after, kind=kind)
-        .all()).prefetch_related('tags')
-    total = 0
+        .prefetch_related('tags'))
+    total = Decimal(0)
     for i in items:
         if group_by == "tag_id":
-            for t in await i.tags.all():
+            for t in list(i.tags):
                 if result.get(t.pk) is None:
                     result[t.pk] = {
                         'tag_id': t.pk,
@@ -107,7 +110,7 @@ async def summary(happened_before: datetime,
 
 
 class ItemModel(BaseModel):
-    amount: float
+    amount: Decimal
     tag_ids: List[int] = []
     kind: EnumType
     happen_at: datetime

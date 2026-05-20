@@ -10,7 +10,7 @@ This is a personal accounting backend inspired by "山竹记账" (Mangosteen Acc
 - **`models/`**: Tortoise ORM models (User, Item, Tag)
 - **`schemas/`**: Pydantic response models using `pydantic_model_creator`
 - **`core/`**: Configuration, security, dependencies, Redis integration
-- **`migrations/`**: Aerich database migrations
+- **`migrations/`**: Aerich database migrations (Must be included in Docker image)
 
 ### Authentication Flow
 - **Email-based authentication** with verification codes (no passwords)
@@ -19,10 +19,11 @@ This is a personal accounting backend inspired by "山竹记账" (Mangosteen Acc
 - Authorization header format: `Authorization: Bearer <token>`
 
 ### Database Patterns
-- **Tortoise ORM** with SQLite (`watch.sqlite`)
+- **Tortoise ORM** with PostgreSQL
 - Models use `fields.ForeignKeyField` and `fields.ManyToManyField`
 - Pydantic schemas auto-generated: `User_Pydantic = pydantic_model_creator(User)`
 - Queries use `prefetch_related()` for relationships: `Item.filter().prefetch_related('tags')`
+- **Aggregation**: Use `annotate()` and `Sum()` for financial calculations to avoid N+1 issues.
 
 ### Rate Limiting & Security
 - **SlowAPI** middleware for rate limiting: `@limiter.limit("1/minute")`
@@ -39,22 +40,29 @@ poetry run python main.py        # Start dev server with auto-reload
 
 ### Database Management
 ```bash
-aerich init -t settings.TORTOISE_ORM    # Initialize migrations
-aerich init-db                          # Create initial migration
-aerich migrate                          # Generate migrations
-aerich upgrade                          # Apply migrations
+# Initial Setup (Dev only)
+aerich init -t settings.TORTOISE_ORM
+aerich init-db
+
+# Routine Changes
+aerich migrate                          # Generate migrations (Dev)
+aerich upgrade                          # Apply migrations (Dev & Prod)
 ```
 
 ### Docker Deployment
 ```bash
-docker-compose up -d              # Production deployment
-# Requires .env with SECRET_KEY and MAIL_PASSWORD
+docker-compose up -d --build      # Production deployment
+# Note: migrations/ folder MUST be included in the image for auto-upgrade
 ```
+
+### Frontend Integration
+- **OpenAPI**: Access `/openapi.json` from the running server.
+- Provide `openapi.json` to frontend Copilot for auto-generating API calls.
 
 ## Domain-Specific Conventions
 
 ### Financial Data Modeling
-- **Items** have `amount` (float), `kind` enum (`income`/`expenses`), and `happen_at` timestamps
+- **Items** have `amount` (Decimal), `kind` enum (`income`/`expenses`), and `happen_at` timestamps
 - **Many-to-many** relationship between Items and Tags via `tags` field
 - Date queries use `happen_at__lt` and `happen_at__gt` with 366-day limit validation
 - Balance calculations: expenses subtract, income adds to balance
@@ -78,12 +86,13 @@ docker-compose up -d              # Production deployment
 - `api/__init__.py`: App setup, middleware, error handling
 - `core/deps.py`: JWT authentication dependency injection
 - `settings.py`: Tortoise ORM configuration
-- `api/v1/endpoints/item.py`: Core business logic with financial calculations
+- `api/v1/endpoints/item.py`: Core business logic with financial calculations (Decimal precision)
 - `core/redis.py`: Environment-aware Redis connection logic
+- `init.sh`: Container startup script (handles DB upgrades)
 
 ## Development Notes
 - **Mixed language**: Chinese comments, English code, Chinese API documentation
 - **No password authentication**: Email + verification code only
-- **Financial precision**: Use `round(amount, 2)` for currency calculations
+- **Financial precision**: Use `Decimal` for all amount calculations. Avoid `float`.
 - **Date handling**: Always validate date ranges don't exceed 1 year
 - **Dependency injection**: Heavily used for user auth and Redis connections

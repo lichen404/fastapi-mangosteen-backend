@@ -16,6 +16,8 @@
 
 ## 优化
 - [x] 利用 redis 实现验证码过期清除
+- [x] 数据库金额字段优化为 Decimal
+- [x] 统计接口性能优化 (数据库聚合)
 
 ## 接口文档地址
 [文档](http://123.57.27.189:3000/docs)
@@ -28,14 +30,22 @@
   ```bash
   SECRET_KEY=secret
   MAIL_PASSWORD=qq邮箱申请的smtp授权码
+  # 生产环境 Docker 部署时，POSTGRES_HOST 会在 docker-compose.yml 中自动覆盖为 'postgres'
+  # 本地开发时请设置为 localhost 或 127.0.0.1
+  POSTGRES_HOST=localhost
+  POSTGRES_PORT=5432
+  POSTGRES_DB=mangosteen
+  POSTGRES_USER=mangosteen
+  POSTGRES_PASSWORD=mangosteen
   ```
-5. 执行 `docker-compose up -d`
+5. 执行 `docker-compose up -d --build`
+   > 注意：容器启动时会自动执行 `aerich upgrade` 进行数据库迁移。
 6. 访问 http://localhost:3000/docs
 
 ### 本地开发使用 Postgres
 若本地需要使用 Postgres 而不是 SQLite，可设置环境变量或在 `.env` 中添加：
 ```bash
-POSTGRES_HOST=localhost
+POSTGRES_HOST=127.0.0.1
 POSTGRES_PORT=5432
 POSTGRES_DB=mangosteen
 POSTGRES_USER=mangosteen
@@ -52,6 +62,9 @@ poetry run aerich init-db
 poetry run aerich migrate
 poetry run aerich upgrade
 ```
+
+### 前端对接
+访问 `http://localhost:3000/openapi.json` 获取接口文档，可将其保存为 `openapi.json` 提供给前端 Copilot 使用。
 
 
 

@@ -18,16 +18,15 @@ class Settings(BaseSettings):
     # JWT
     # token相关
     ALGORITHM: str = "HS256"  # 加密算法
-    SECRET_KEY: str = ""
+    SECRET_KEY: str = "1234567890abcdef"  # 加密密钥，生产环境请使用更复杂的密钥
 
     ORIGINS: List[str] = [
-        "http://localhost:3000"
-        "http://127.0.0.1:3000"
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
         "http://localhost",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "http://mangosteen.lichen404.top",
-        "*"
     ]
 
 
