@@ -18,7 +18,7 @@ class Form(BaseModel):
 
 @login.post("/session", summary="登录")
 async def user_login(form: Form, redis=Depends(get_redis)):
-    if stored_code := redis.get(form.email):
+    if stored_code := await redis.get(form.email):
         if form.code != stored_code.decode():
             raise HTTPException(status_code=400, detail="验证码错误")
         if user := await User.get_or_create(email=form.email):

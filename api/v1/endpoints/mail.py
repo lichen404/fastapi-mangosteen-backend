@@ -46,7 +46,7 @@ async def send_in_background(
 ) -> JSONResponse:
     code = generate_verification_code()
     user_email: EmailStr = email.email
-    redis.set(user_email, code, ex=300)
+    await redis.set(user_email, code, ex=300)
     message = MessageSchema(
         subject="山竹记账验证码",
         recipients=[user_email],

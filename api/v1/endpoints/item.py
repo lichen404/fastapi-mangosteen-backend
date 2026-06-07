@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from tortoise.functions import Sum
 from core import deps
 from models import Item, Tag
+from schemas import Item_Pydantic
 
 item = APIRouter(tags=["Item相关"])
 
@@ -118,7 +119,8 @@ class ItemModel(BaseModel):
 
 @item.post("/items", summary="新增item")
 async def item_create(item_form: ItemModel, user=Depends(deps.get_current_user)):
-    data = await Item.create(user=user, **item_form.model_dump())
-    tags = await Tag.filter(id__in=item_form.tag_ids)
+    data = await Item.create(user=user, **item_form.model_dump(exclude={'tag_ids'}))
+    tags = await Tag.filter(id__in=item_form.tag_ids, user=user)
     await data.tags.add(*tags)
-    return data
+    await data.fetch_related('tags')
+    return {'resource': await Item_Pydantic.from_tortoise_orm(data)}

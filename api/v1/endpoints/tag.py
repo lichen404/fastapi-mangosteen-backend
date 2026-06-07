@@ -23,7 +23,7 @@ async def item_list(kind: Literal['expenses', 'income'], limit: int = 25, page: 
     skip = (page - 1) * limit
     base_filter = Tag.filter(user=current_user, kind=kind)
     tags, count = await asyncio.gather(
-        base_filter.offset(skip).limit(limit).order_by('-id'),
+        Tag_Pydantic.from_queryset(base_filter.offset(skip).limit(limit).order_by('-id')),
         base_filter.count()
     )
     data = {
@@ -40,10 +40,10 @@ async def item_list(kind: Literal['expenses', 'income'], limit: int = 25, page: 
 @tag.post("/tags", summary="新增标签")
 async def tag_create(tag_from: TagIn_Pydantic, user=Depends(deps.get_current_user)):
     data = await Tag_Pydantic.from_tortoise_orm(await Tag.create(user=user, **tag_from.model_dump()))
-    return data
+    return {'resource': data}
 
 
-@tag.put("/tags/{pk}", summary="编辑标签", dependencies=[Depends(deps.get_current_user)])
+@tag.put("/tags/{pk}", summary="编辑标签")
 async def tag_update(pk: int, tag_form: TagIn_Pydantic, user=Depends(deps.get_current_user)):
     updated = await Tag.filter(pk=pk,user=user).update(**tag_form.model_dump(), updated_at=datetime.now(timezone.utc))
     if updated:
@@ -51,7 +51,7 @@ async def tag_update(pk: int, tag_form: TagIn_Pydantic, user=Depends(deps.get_cu
     return JSONResponse(content={"msg": "更新失败"}, status_code=400)
 
 
-@tag.delete("/tags/{pk}", summary="删除标签", dependencies=[Depends(deps.get_current_user)])
+@tag.delete("/tags/{pk}", summary="删除标签")
 async def tag_delete(pk: int, with_items: bool = False,user=Depends(deps.get_current_user)):
     if with_items:
         t = await Tag.filter(pk=pk,user=user).first().prefetch_related('items')
